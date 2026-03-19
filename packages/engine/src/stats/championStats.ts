@@ -62,8 +62,9 @@ export function calcChampionStats(
 
 /**
  * Attack speed formula.
- * AS = baseAS * (1 + (growthBonus + bonusAS%) / 100)
- * Capped at 2.5
+ * AS = baseAS + asRatio * (growthBonus + bonusAS%) / 100
+ * asRatio is usually equal to baseAS but differs for some champions.
+ * Capped at 2.5 (floor 0.2)
  */
 export function calcAttackSpeed(
   baseAS: number,
@@ -77,5 +78,6 @@ export function calcAttackSpeed(
     lv <= 1
       ? 0
       : asGrowth * (lv - 1) * (0.7025 + 0.0175 * (lv - 1));
-  return Math.min(2.5, baseAS * (1 + (growthBonus + bonusASPercent) / 100));
+  const totalBonusPercent = growthBonus + bonusASPercent;
+  return Math.min(2.5, Math.max(0.2, baseAS + asRatio * totalBonusPercent / 100));
 }

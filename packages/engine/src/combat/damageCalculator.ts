@@ -5,7 +5,7 @@ import type {
   AbilityResult,
   AbilityKey,
 } from "@lol-sim/types";
-import { calcEffectiveResist, lethalityToFlatPen } from "../systems/penetration";
+import { calcEffectiveResist } from "../systems/penetration";
 
 /**
  * Damage after resistance formula.
@@ -57,7 +57,6 @@ export function calcAutoAttackDamage(
     baseResist: target.armor,
     percentPen: stats.armorPen,
     lethality: stats.lethality,
-    attackerLevel: level,
   });
 
   let finalDamage = calcDamageAfterResist(rawPhysical, effectiveArmor);
@@ -112,7 +111,6 @@ export function calcAbilityDamage(
       baseResist: target.armor,
       percentPen: stats.armorPen,
       lethality: stats.lethality,
-      attackerLevel: level,
     });
   } else if (ability.damageType === "magic") {
     effectiveResist = calcEffectiveResist({

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { calcGrowthStat, calcChampionStats, calcAttackSpeed } from "../src/stats/championStats";
 import { aggregateItemStats } from "../src/stats/itemStats";
-import { mergeStats } from "../src/stats/mergeStats";
+import { mergeStats, applyMoveSpeedSoftCap } from "../src/stats/mergeStats";
 import type { ChampionBaseStats, ItemStats } from "@lol-sim/types";
 
 describe("calcGrowthStat", () => {
@@ -36,6 +36,11 @@ describe("calcAttackSpeed", () => {
     expect(calcAttackSpeed(0.625, 0.625, 1.0, 18, 500)).toBe(2.5);
   });
 
+  it("has floor of 0.2", () => {
+    // Even with 0 base and 0 growth, can't go below 0.2
+    expect(calcAttackSpeed(0.1, 0.1, 0, 1, -50)).toBe(0.2);
+  });
+
   it("increases with level", () => {
     const as1 = calcAttackSpeed(0.625, 0.625, 3.4, 1, 0);
     const as18 = calcAttackSpeed(0.625, 0.625, 3.4, 18, 0);
@@ -46,6 +51,18 @@ describe("calcAttackSpeed", () => {
     const noBonus = calcAttackSpeed(0.625, 0.625, 1.0, 10, 0);
     const withBonus = calcAttackSpeed(0.625, 0.625, 1.0, 10, 50);
     expect(withBonus).toBeGreaterThan(noBonus);
+  });
+
+  it("uses asRatio instead of baseAS for bonus calculation", () => {
+    // Champion with different asRatio than baseAS
+    // AS = baseAS + asRatio * bonus% / 100
+    const baseAS = 0.625;
+    const asRatio = 0.7; // different from baseAS
+    const bonusPercent = 100;
+    const result = calcAttackSpeed(baseAS, asRatio, 0, 1, bonusPercent);
+    // Expected: 0.625 + 0.7 * 100 / 100 = 0.625 + 0.7 = 1.325
+    expect(result).toBeCloseTo(1.325, 3);
+    // If using baseAS incorrectly: 0.625 + 0.625 * 1.0 = 1.25 (wrong)
   });
 });
 
@@ -124,6 +141,33 @@ describe("aggregateItemStats", () => {
   });
 });
 
+describe("applyMoveSpeedSoftCap", () => {
+  it("returns raw speed when <= 415", () => {
+    expect(applyMoveSpeedSoftCap(340)).toBe(340);
+    expect(applyMoveSpeedSoftCap(415)).toBe(415);
+  });
+
+  it("applies 0.8 multiplier for 415-490 range", () => {
+    // 450 raw: 415 + (450 - 415) * 0.8 = 415 + 28 = 443
+    expect(applyMoveSpeedSoftCap(450)).toBeCloseTo(443, 0);
+  });
+
+  it("applies 0.5 multiplier above 490", () => {
+    // 550 raw: 415 + 75 * 0.8 + (550 - 490) * 0.5 = 415 + 60 + 30 = 505
+    expect(applyMoveSpeedSoftCap(550)).toBeCloseTo(505, 0);
+  });
+
+  it("applies floor for very low speeds", () => {
+    // < 220: 110 + raw * 0.5
+    expect(applyMoveSpeedSoftCap(200)).toBeCloseTo(210, 0);
+  });
+
+  it("handles negative speeds", () => {
+    // < 0: 110 + raw * 0.01
+    expect(applyMoveSpeedSoftCap(-100)).toBeCloseTo(109, 0);
+  });
+});
+
 describe("mergeStats", () => {
   const garenBase: ChampionBaseStats = {
     hp: 690,
@@ -173,11 +217,20 @@ describe("mergeStats", () => {
     expect(merged.hp).toBe(1090);
   });
 
-  it("applies moveSpeedPercent as a multiplier", () => {
+  it("applies moveSpeedPercent then soft cap", () => {
     const itemStats: ItemStats = { moveSpeed: 25, moveSpeedPercent: 10 };
     const merged = mergeStats(garenBase, 1, itemStats);
-    // (340 + 25) * 1.10 = 401.5
+    // Raw: (340 + 25) * 1.10 = 401.5 (below 415 soft cap, no reduction)
     expect(merged.moveSpeed).toBeCloseTo(401.5, 1);
+  });
+
+  it("applies move speed soft cap above 415", () => {
+    // Give enough bonus to push over 415
+    const itemStats: ItemStats = { moveSpeed: 50, moveSpeedPercent: 20 };
+    const merged = mergeStats(garenBase, 1, itemStats);
+    // Raw: (340 + 50) * 1.20 = 468
+    // Soft capped: 415 + (468 - 415) * 0.8 = 415 + 42.4 = 457.4
+    expect(merged.moveSpeed).toBeCloseTo(457.4, 0);
   });
 
   it("handles omnivamp separately from lifeSteal", () => {

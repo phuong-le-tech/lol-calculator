@@ -3,21 +3,21 @@ import { registerPassive } from "../passiveRegistry";
 
 /**
  * Lord Dominik's Regards:
- * - 35% armor penetration (applied via ItemStats.armorPen)
- * - Giant Slayer: deal 0%-15% bonus damage based on max HP difference
- *   (0% at equal HP, 15% at 2000+ HP difference)
+ * - 35% armor penetration (applied via ItemStats.armorPen, not as a passive)
+ * - Giant Slayer passive was REMOVED in V14.10
+ *
+ * The 35% armor pen is a stat, not an active passive effect.
+ * This passive definition is kept as a no-op for registry completeness,
+ * since the armor pen is handled via the item's stats.
  */
 const lordDominiks: ItemPassiveDefinition = {
   itemId: 3036,
-  name: "Giant Slayer",
+  name: "Last Whisper",
   hook: "preCalculation",
-  apply: (ctx) => {
-    // Giant Slayer: bonus damage based on max HP difference between attacker and target
-    const hpDiff = Math.max(0, ctx.target.hp - ctx.stats.hp);
-    // Scales linearly from 0% at 0 diff to 15% at 2000+ diff
-    const bonusDamagePercent = Math.min(15, (hpDiff / 2000) * 15);
-    // Apply as a multiplier to all damage dealt (matches in-game behavior)
-    ctx.damageMultiplier *= 1 + bonusDamagePercent / 100;
+  apply: () => {
+    // 35% armor pen is applied as a stat (armorPen) on the item itself.
+    // Giant Slayer passive was removed in V14.10.
+    // No active passive effect.
   },
 };
 

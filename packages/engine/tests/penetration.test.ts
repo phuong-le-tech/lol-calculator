@@ -2,24 +2,14 @@ import { describe, it, expect } from "vitest";
 import { calcEffectiveResist, lethalityToFlatPen } from "../src/systems/penetration";
 
 describe("lethalityToFlatPen", () => {
-  it("converts lethality at level 1", () => {
-    // 18 lethality at level 1: 18 * (0.6 + 0.4 * 1 / 18)
-    const pen = lethalityToFlatPen(18, 1);
-    expect(pen).toBeCloseTo(18 * (0.6 + 0.4 / 18), 2);
+  it("converts lethality 1:1 (no level scaling since V14.1)", () => {
+    expect(lethalityToFlatPen(18)).toBe(18);
   });
 
-  it("converts lethality at level 18 (full value)", () => {
-    // At level 18: lethality * (0.6 + 0.4) = lethality * 1.0
-    const pen = lethalityToFlatPen(18, 18);
-    expect(pen).toBeCloseTo(18, 2);
-  });
-
-  it("scales linearly with level", () => {
-    const l1 = lethalityToFlatPen(10, 1);
-    const l9 = lethalityToFlatPen(10, 9);
-    const l18 = lethalityToFlatPen(10, 18);
-    expect(l9).toBeGreaterThan(l1);
-    expect(l18).toBeGreaterThan(l9);
+  it("converts any lethality value 1:1", () => {
+    expect(lethalityToFlatPen(10)).toBe(10);
+    expect(lethalityToFlatPen(0)).toBe(0);
+    expect(lethalityToFlatPen(30)).toBe(30);
   });
 });
 
@@ -29,12 +19,20 @@ describe("calcEffectiveResist", () => {
     expect(result).toBe(100);
   });
 
-  it("applies flat reduction first", () => {
+  it("applies flat reduction first (CAN go below 0)", () => {
     const result = calcEffectiveResist({
       baseResist: 100,
       flatReduction: 20,
     });
     expect(result).toBe(80);
+  });
+
+  it("flat reduction CAN make resist negative", () => {
+    const result = calcEffectiveResist({
+      baseResist: 10,
+      flatReduction: 30,
+    });
+    expect(result).toBe(-20);
   });
 
   it("applies percentage reduction after flat reduction", () => {
@@ -60,21 +58,19 @@ describe("calcEffectiveResist", () => {
     const result = calcEffectiveResist({
       baseResist: 100,
       lethality: 18,
-      attackerLevel: 18,
     });
-    // 100 - 18 = 82 (full lethality at level 18)
+    // 100 - 18 = 82
     expect(result).toBeCloseTo(82, 0);
   });
 
   it("applies full penetration order correctly", () => {
-    // 100 armor, 10 flat reduction, 30% reduction, 35% pen, 18 lethality at level 18
+    // 100 armor, 10 flat reduction, 30% reduction, 35% pen, 18 lethality
     const result = calcEffectiveResist({
       baseResist: 100,
       flatReduction: 10,
       percentReduction: 30,
       percentPen: 35,
       lethality: 18,
-      attackerLevel: 18,
     });
     // Step 1: 100 - 10 = 90
     // Step 2: 90 * 0.70 = 63
@@ -83,13 +79,21 @@ describe("calcEffectiveResist", () => {
     expect(result).toBeCloseTo(22.95, 1);
   });
 
-  it("can go negative", () => {
+  it("lethality cannot reduce resist below 0", () => {
     const result = calcEffectiveResist({
       baseResist: 20,
       lethality: 30,
-      attackerLevel: 18,
     });
-    expect(result).toBeLessThan(0);
+    // Lethality can't go below 0 (only flat reduction can)
+    expect(result).toBe(0);
+  });
+
+  it("flat magic pen cannot reduce resist below 0", () => {
+    const result = calcEffectiveResist({
+      baseResist: 10,
+      flatMagicPen: 25,
+    });
+    expect(result).toBe(0);
   });
 
   it("does not apply % pen to negative resist", () => {
@@ -99,15 +103,25 @@ describe("calcEffectiveResist", () => {
       flatReduction: 20,
       percentPen: 50,
     });
-    // 5 - 20 = -15, negative so % pen skipped
+    // 5 - 20 = -15, negative so % pen skipped, flat pen skipped
     expect(result).toBe(-15);
   });
 
-  it("applies flat magic pen", () => {
+  it("applies flat magic pen correctly", () => {
     const result = calcEffectiveResist({
       baseResist: 50,
       flatMagicPen: 18,
     });
     expect(result).toBe(32);
+  });
+
+  it("does not apply flat pen when resist is already 0 or below", () => {
+    const result = calcEffectiveResist({
+      baseResist: 5,
+      flatReduction: 10,
+      lethality: 20,
+    });
+    // 5 - 10 = -5, negative so lethality is not applied
+    expect(result).toBe(-5);
   });
 });

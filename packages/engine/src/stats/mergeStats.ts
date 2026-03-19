@@ -2,6 +2,21 @@ import type { ChampionBaseStats, FinalStats, ItemStats } from "@lol-sim/types";
 import { calcChampionStats, calcAttackSpeed } from "./championStats";
 
 /**
+ * Apply League's move speed soft caps.
+ * - Raw 415-490: excess above 415 multiplied by 0.8
+ * - Raw > 490: excess above 490 multiplied by 0.5
+ * - Raw < 220: 110 + raw * 0.5
+ */
+export function applyMoveSpeedSoftCap(raw: number): number {
+  if (raw < 0) return 110 + raw * 0.01;
+  if (raw < 220) return 110 + raw * 0.5;
+  if (raw <= 415) return raw;
+  if (raw <= 490) return 415 + (raw - 415) * 0.8;
+  // > 490
+  return 415 + (490 - 415) * 0.8 + (raw - 490) * 0.5;
+}
+
+/**
  * Merge champion base stats (at level) with aggregated item stats.
  * This produces the final stat block used for all calculations.
  */
@@ -15,10 +30,11 @@ export function mergeStats(
   const bonusHp = itemStats.hp || 0;
   const bonusAd = itemStats.ad || 0;
 
-  // Move speed: flat additive first, then percentage multiplier
+  // Move speed: flat additive first, then percentage multiplier, then soft cap
   const flatMoveSpeed = champ.moveSpeed + (itemStats.moveSpeed || 0);
   const moveSpeedPercent = itemStats.moveSpeedPercent || 0;
-  const finalMoveSpeed = flatMoveSpeed * (1 + moveSpeedPercent / 100);
+  const rawMoveSpeed = flatMoveSpeed * (1 + moveSpeedPercent / 100);
+  const finalMoveSpeed = applyMoveSpeedSoftCap(rawMoveSpeed);
 
   return {
     hp: champ.hp + bonusHp,
