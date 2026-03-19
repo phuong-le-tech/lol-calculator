@@ -7,6 +7,7 @@ import { TopBar } from "./layout/TopBar";
 import { LeftSidebar } from "./layout/LeftSidebar";
 import { CenterPanel } from "./layout/CenterPanel";
 import { RightSidebar } from "./layout/RightSidebar";
+import { ChampionSelectModal } from "./champion/ChampionSelectModal";
 
 interface SimulatorPageProps {
   champions: Champion[];
@@ -22,13 +23,16 @@ export function SimulatorPage({ champions, items, patchVersion }: SimulatorPageP
   }, [champions, items, patchVersion, setData]);
 
   return (
-    <div className="flex h-screen flex-col">
-      <TopBar />
-      <div className="flex min-h-0 flex-1">
-        <LeftSidebar />
-        <CenterPanel />
-        <RightSidebar />
+    <>
+      <div className="flex h-screen flex-col">
+        <TopBar />
+        <div className="flex min-h-0 flex-1">
+          <LeftSidebar />
+          <CenterPanel />
+          <RightSidebar />
+        </div>
       </div>
-    </div>
+      <ChampionSelectModal />
+    </>
   );
 }
