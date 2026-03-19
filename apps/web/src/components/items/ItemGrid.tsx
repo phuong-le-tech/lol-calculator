@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { useDataStore } from "../../stores/useDataStore";
+import { useSimulatorStore } from "../../stores/useSimulatorStore";
 import { ItemIcon } from "./ItemIcon";
 import type { Item } from "@lol-sim/types";
 
@@ -48,6 +49,8 @@ interface ItemGridProps {
 
 export function ItemGrid({ selectedItemId, onSelectItem }: ItemGridProps) {
   const items = useDataStore((s) => s.items);
+  const itemIds = useSimulatorStore((s) => s.itemIds);
+  const equippedSet = useMemo(() => new Set(itemIds.filter((id) => id !== 0)), [itemIds]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
 
@@ -94,28 +97,36 @@ export function ItemGrid({ selectedItemId, onSelectItem }: ItemGridProps) {
       {/* Scrollable item grid */}
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         <div className="grid grid-cols-2 gap-2">
-          {filtered.map((item) => (
-            <button
-              key={item.riotId}
-              onClick={() => onSelectItem(item)}
-              className={`flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-all duration-150 ${
-                selectedItemId === item.riotId
-                  ? "border-gold-300 bg-dark-300 shadow-sm shadow-gold-glow"
-                  : "border-dark-200 bg-dark-400 hover:border-gold-600 hover:bg-dark-300"
-              }`}
-            >
-              <ItemIcon
-                src={item.imageUrl}
-                alt={item.name}
-                size={32}
-                className="shrink-0 rounded"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium text-dark-100">{item.name}</p>
-                <p className="text-xs text-gold-500">{item.cost}g</p>
-              </div>
-            </button>
-          ))}
+          {filtered.map((item) => {
+            const isEquipped = equippedSet.has(item.riotId);
+            return (
+              <button
+                key={item.riotId}
+                onClick={() => !isEquipped && onSelectItem(item)}
+                disabled={isEquipped}
+                className={`flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-all duration-150 ${
+                  isEquipped
+                    ? "cursor-not-allowed border-dark-200 bg-dark-400 opacity-40"
+                    : selectedItemId === item.riotId
+                      ? "border-gold-300 bg-dark-300 shadow-sm shadow-gold-glow"
+                      : "border-dark-200 bg-dark-400 hover:border-gold-600 hover:bg-dark-300"
+                }`}
+              >
+                <ItemIcon
+                  src={item.imageUrl}
+                  alt={item.name}
+                  size={32}
+                  className="shrink-0 rounded"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-medium text-dark-100">{item.name}</p>
+                  <p className="text-xs text-gold-500">
+                    {isEquipped ? "Equipped" : `${item.cost}g`}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
         </div>
         {filtered.length === 0 && (
           <p className="py-8 text-center text-sm text-dark-50">No items found</p>
