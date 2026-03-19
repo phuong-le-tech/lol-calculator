@@ -99,10 +99,9 @@ function normalizeMerakiAbility(
   // Extract cost
   const cost = extractModifierValues(raw.cost?.modifiers, maxRank);
 
-  // Use spell image URL for abilities (Meraki icon field contains the DDragon spell key)
-  const imageUrl = raw.icon
-    ? client.getSpellImageUrl(version, raw.icon)
-    : client.getChampionImageUrl(version, championKey);
+  // Meraki icon field is a full Community Dragon URL — use it directly.
+  // Fall back to champion portrait if missing.
+  const imageUrl = raw.icon || client.getChampionImageUrl(version, championKey);
 
   return {
     key,

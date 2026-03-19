@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "ddragon.leagueoflegends.com",
         pathname: "/cdn/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.communitydragon.org",
+        pathname: "/**",
+      },
     ],
   },
   transpilePackages: ["@lol-sim/engine", "@lol-sim/types", "@lol-sim/ddragon"],
@@ -21,7 +26,7 @@ const nextConfig: NextConfig = {
         { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         {
           key: "Content-Security-Policy",
-          value: "default-src 'self'; img-src 'self' https://ddragon.leagueoflegends.com data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; frame-ancestors 'none';",
+          value: "default-src 'self'; img-src 'self' https://ddragon.leagueoflegends.com https://cdn.communitydragon.org data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; frame-ancestors 'none';",
         },
       ],
     },
