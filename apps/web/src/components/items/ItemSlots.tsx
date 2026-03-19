@@ -3,7 +3,7 @@
 import { useSimulatorStore } from "../../stores/useSimulatorStore";
 import { useDataStore } from "../../stores/useDataStore";
 import { ItemIcon } from "./ItemIcon";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 
 export function ItemSlots() {
   const itemIds = useSimulatorStore((s) => s.itemIds);
@@ -25,11 +25,11 @@ export function ItemSlots() {
               <button
                 key={i}
                 onClick={() => setItemSelectOpen(true, i)}
-                className="group relative overflow-hidden rounded border-2 border-gold-600"
+                className="group relative overflow-hidden rounded border-2 border-gold-600 transition-all duration-200 hover:border-gold-300 hover:shadow-sm hover:shadow-gold-glow"
               >
                 <ItemIcon src={item.imageUrl} alt={item.name} size={32} />
                 <div
-                  className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-all duration-200 group-hover:opacity-100"
                   onClick={(e) => {
                     e.stopPropagation();
                     removeItem(i);
@@ -44,14 +44,16 @@ export function ItemSlots() {
             <button
               key={i}
               onClick={() => setItemSelectOpen(true, i)}
-              className="h-8 w-8 rounded bg-dark-300 transition-colors hover:bg-dark-200"
-            />
+              className="flex h-8 w-8 items-center justify-center rounded border border-dashed border-dark-200 bg-dark-300 transition-all duration-200 hover:border-gold-600 hover:bg-dark-200 hover:shadow-sm hover:shadow-gold-glow"
+            >
+              <Plus size={12} className="text-dark-50" />
+            </button>
           );
         })}
       </div>
       {totalCost > 0 && (
         <span className="text-xs text-dark-50">
-          Build Cost: {totalCost.toLocaleString()}g
+          Build Cost: <span className="text-gold-500">{totalCost.toLocaleString()}g</span>
         </span>
       )}
     </div>

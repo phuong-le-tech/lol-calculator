@@ -8,13 +8,38 @@ import type { Item } from "@lol-sim/types";
 
 const CATEGORIES = [
   { id: "all", label: "All" },
-  { id: "damage", label: "AD" },
-  { id: "magic", label: "AP" },
+  { id: "ad", label: "AD" },
+  { id: "ap", label: "AP" },
   { id: "hp", label: "HP" },
-  { id: "attack_speed", label: "AS" },
+  { id: "as", label: "AS" },
   { id: "crit", label: "Crit" },
   { id: "defense", label: "Defense" },
 ];
+
+function matchesCategory(item: Item, category: string): boolean {
+  switch (category) {
+    case "all":
+      return true;
+    case "ad":
+      return (item.stats.ad ?? 0) > 0 || (item.stats.lethality ?? 0) > 0;
+    case "ap":
+      return (item.stats.ap ?? 0) > 0;
+    case "hp":
+      return (item.stats.hp ?? 0) > 0;
+    case "as":
+      return (item.stats.attackSpeed ?? 0) > 0;
+    case "crit":
+      return (item.stats.critChance ?? 0) > 0;
+    case "defense":
+      return (
+        (item.stats.armor ?? 0) > 0 ||
+        (item.stats.mr ?? 0) > 0 ||
+        item.category === "defense"
+      );
+    default:
+      return true;
+  }
+}
 
 interface ItemGridProps {
   selectedItemId: number | null;
@@ -30,17 +55,13 @@ export function ItemGrid({ selectedItemId, onSelectItem }: ItemGridProps) {
     return items
       .filter((item) => item.isCompleted)
       .filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
-      .filter((item) => {
-        if (category === "all") return true;
-        if (category === "hp") return (item.stats.hp ?? 0) > 0;
-        if (category === "crit") return (item.stats.critChance ?? 0) > 0;
-        return item.category === category;
-      })
+      .filter((item) => matchesCategory(item, category))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [items, search, category]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex h-full flex-col gap-3">
+      {/* Search */}
       <div className="flex items-center gap-2 rounded-md bg-dark-400 px-3 py-2">
         <Search size={14} className="text-dark-50" />
         <input
@@ -53,14 +74,15 @@ export function ItemGrid({ selectedItemId, onSelectItem }: ItemGridProps) {
         />
       </div>
 
+      {/* Category filters */}
       <div className="flex flex-wrap gap-1">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setCategory(cat.id)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ${
               category === cat.id
-                ? "bg-gold-300 text-dark-600"
+                ? "bg-gold-300 text-dark-600 shadow-sm shadow-gold-glow"
                 : "bg-dark-300 text-dark-100 hover:bg-dark-200"
             }`}
           >
@@ -69,16 +91,17 @@ export function ItemGrid({ selectedItemId, onSelectItem }: ItemGridProps) {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      {/* Scrollable item grid */}
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         <div className="grid grid-cols-2 gap-2">
           {filtered.map((item) => (
             <button
               key={item.riotId}
               onClick={() => onSelectItem(item)}
-              className={`flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-colors ${
+              className={`flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-all duration-150 ${
                 selectedItemId === item.riotId
-                  ? "border-gold-300 bg-dark-300"
-                  : "border-dark-200 bg-dark-400 hover:border-dark-100"
+                  ? "border-gold-300 bg-dark-300 shadow-sm shadow-gold-glow"
+                  : "border-dark-200 bg-dark-400 hover:border-gold-600 hover:bg-dark-300"
               }`}
             >
               <ItemIcon
