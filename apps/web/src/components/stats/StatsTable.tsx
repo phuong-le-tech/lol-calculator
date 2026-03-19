@@ -63,14 +63,14 @@ export function StatsTable() {
     <div className="grid grid-cols-2 gap-x-4">
       <div className="flex flex-col">
         {leftColumn.map((row, i) => (
-          <div key={row.label} className={i % 2 === 0 ? "bg-dark-400/50 rounded" : ""}>
+          <div key={`left-${i}`} className={i % 2 === 0 ? "bg-dark-400/50 rounded" : ""}>
             <StatRowDisplay {...row} />
           </div>
         ))}
       </div>
       <div className="flex flex-col">
         {rightColumn.map((row, i) => (
-          <div key={row.label} className={i % 2 === 0 ? "bg-dark-400/50 rounded" : ""}>
+          <div key={`right-${i}`} className={i % 2 === 0 ? "bg-dark-400/50 rounded" : ""}>
             <StatRowDisplay {...row} />
           </div>
         ))}
