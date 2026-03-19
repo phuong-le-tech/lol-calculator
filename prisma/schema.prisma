@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth (NextAuth.js v5 — JWT strategy, no Session table) ───
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  riotId        String?   @unique
+  accounts      Account[]
+  builds        Build[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// ─── Game Data ─────────────────────────────────────────
+
+model Patch {
+  id        String    @id // e.g. "14.10.1"
+  isActive  Boolean   @default(false)
+  syncedAt  DateTime  @default(now())
+  champions Champion[]
+  items     Item[]
+}
+
+model Champion {
+  id        String @id @default(cuid())
+  riotId    String
+  name      String  @db.VarChar(64)
+  title     String  @db.VarChar(128)
+  role      String  @db.VarChar(32)
+  imageUrl  String @db.VarChar(512)
+  patchId   String
+
+  // Base stats
+  baseHP      Float
+  hpGrowth    Float
+  baseAD      Float
+  adGrowth    Float
+  baseArmor   Float
+  armorGrowth Float
+  baseMR      Float
+  mrGrowth    Float
+  baseAS      Float
+  asRatio     Float
+  asGrowth    Float
+  baseMS      Float
+  range       Float
+
+  // Abilities stored as JSON
+  abilities Json
+
+  patch  Patch           @relation(fields: [patchId], references: [id])
+  builds BuildChampion[]
+
+  @@unique([riotId, patchId])
+  @@index([patchId])
+}
+
+model Item {
+  id          String  @id @default(cuid())
+  riotId      Int
+  name        String  @db.VarChar(128)
+  description String  @db.Text
+  imageUrl    String  @db.VarChar(512)
+  cost        Int
+  category    String  @db.VarChar(32)
+  stats       Json
+  passives    Json?
+  isCompleted Boolean @default(true)
+  patchId     String
+
+  patch Patch @relation(fields: [patchId], references: [id])
+
+  @@unique([riotId, patchId])
+  @@index([patchId])
+}
+
+// ─── User Builds ───────────────────────────────────────
+
+model Build {
+  id           String         @id @default(cuid())
+  name         String         @db.VarChar(128)
+  slug         String         @unique @db.VarChar(32)
+  userId       String
+  champion     BuildChampion?
+  items        BuildItem[]
+  target       Json
+  level        Int
+  abilityRanks Json
+  combo        Json           @default("[]")
+  notes        String?        @db.VarChar(5000)
+  isPublic     Boolean        @default(false)
+  viewCount    Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isPublic, viewCount(sort: Desc)])
+}
+
+model BuildChampion {
+  id         String @id @default(cuid())
+  buildId    String @unique
+  championId String
+
+  build    Build    @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  champion Champion @relation(fields: [championId], references: [id])
+}
+
+model BuildItem {
+  id         String @id @default(cuid())
+  buildId    String
+  itemRiotId Int
+  slot       Int // 0-5
+
+  build Build @relation(fields: [buildId], references: [id], onDelete: Cascade)
+
+  @@unique([buildId, slot])
+  @@index([buildId])
+}
