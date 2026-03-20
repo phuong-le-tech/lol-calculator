@@ -3,6 +3,7 @@
 import { ChampionGrid } from "../champion/ChampionGrid";
 import { ChampionInfo } from "../champion/ChampionInfo";
 import { LevelSlider } from "../shared/LevelSlider";
+import { ItemSlots } from "../items/ItemSlots";
 import { useSimulatorStore } from "../../stores/useSimulatorStore";
 import { Search } from "lucide-react";
 
@@ -53,15 +54,7 @@ export function LeftSidebar() {
         </div>
       </div>
 
-      {/* Items placeholder */}
-      <div className="flex flex-col gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-dark-50">Items</span>
-        <div className="flex gap-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-8 w-8 rounded bg-dark-300" />
-          ))}
-        </div>
-      </div>
+      <ItemSlots />
     </aside>
   );
 }
