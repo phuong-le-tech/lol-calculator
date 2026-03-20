@@ -43,15 +43,24 @@ export function ItemSelectModal() {
       className={`fixed inset-0 z-50 flex items-center justify-center transition-colors duration-200 ${
         isVisible ? "bg-black/60" : "bg-black/0"
       }`}
-      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Select Item"
     >
+      {/* Invisible backdrop button for closing */}
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default"
+        onClick={handleClose}
+        aria-label="Close modal"
+        tabIndex={-1}
+      />
       <div
-        className={`flex h-[690px] max-h-[80vh] w-[860px] flex-col overflow-hidden rounded-xl border border-dark-200 bg-dark-500 shadow-2xl transition-all duration-200 ${
+        className={`relative flex h-[690px] max-h-[80vh] w-[860px] flex-col overflow-hidden rounded-xl border border-dark-200 bg-dark-500 shadow-2xl transition-all duration-200 ${
           isVisible
             ? "scale-100 opacity-100"
             : "scale-95 opacity-0"
         }`}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-dark-200 px-6 py-4">
