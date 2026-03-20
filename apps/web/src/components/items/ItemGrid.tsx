@@ -2,9 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
+import { motion } from "framer-motion";
 import { useDataStore } from "../../stores/useDataStore";
 import { useSimulatorStore } from "../../stores/useSimulatorStore";
 import { ItemIcon } from "./ItemIcon";
+import { SPRING, staggerContainer, staggerItem } from "../../lib/motion";
 import type { Item } from "@lol-sim/types";
 
 const CATEGORIES = [
@@ -77,34 +79,50 @@ export function ItemGrid({ selectedItemId, onSelectItem }: ItemGridProps) {
         />
       </div>
 
-      {/* Category filters */}
+      {/* Category filters with sliding indicator */}
       <div className="flex flex-wrap gap-1">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setCategory(cat.id)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ${
+            className={`relative rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               category === cat.id
-                ? "bg-gold-300 text-dark-600 shadow-sm shadow-gold-glow"
+                ? "text-dark-600"
                 : "bg-dark-300 text-dark-100 hover:bg-dark-200"
             }`}
           >
-            {cat.label}
+            {category === cat.id && (
+              <motion.span
+                layoutId="item-category-bg"
+                className="absolute inset-0 rounded-full bg-gold-300 shadow-sm shadow-gold-glow"
+                transition={SPRING.snappy}
+              />
+            )}
+            <span className="relative z-10">{cat.label}</span>
           </button>
         ))}
       </div>
 
-      {/* Scrollable item grid */}
+      {/* Scrollable item grid with stagger */}
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <div className="grid grid-cols-2 gap-2">
+        <motion.div
+          key={`${search}-${category}`}
+          className="grid grid-cols-3 gap-2"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
           {filtered.map((item) => {
             const isEquipped = equippedSet.has(item.riotId);
             return (
-              <button
+              <motion.button
                 key={item.riotId}
+                variants={staggerItem}
                 onClick={() => !isEquipped && onSelectItem(item)}
                 disabled={isEquipped}
-                className={`flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-all duration-150 ${
+                whileHover={!isEquipped ? { scale: 1.02 } : undefined}
+                whileTap={!isEquipped ? { scale: 0.98 } : undefined}
+                className={`flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-colors duration-150 ${
                   isEquipped
                     ? "cursor-not-allowed border-dark-200 bg-dark-400 opacity-40"
                     : selectedItemId === item.riotId
@@ -124,10 +142,10 @@ export function ItemGrid({ selectedItemId, onSelectItem }: ItemGridProps) {
                     {isEquipped ? "Equipped" : `${item.cost}g`}
                   </p>
                 </div>
-              </button>
+              </motion.button>
             );
           })}
-        </div>
+        </motion.div>
         {filtered.length === 0 && (
           <p className="py-8 text-center text-sm text-dark-50">No items found</p>
         )}

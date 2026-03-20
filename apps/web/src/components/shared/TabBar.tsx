@@ -1,5 +1,8 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { SPRING } from "../../lib/motion";
+
 interface Tab {
   id: string;
   label: string;
@@ -28,11 +31,19 @@ export function TabBar({ tabs, activeTab, onTabChange }: TabBarProps) {
           }`}
         >
           {activeTab === tab.id && (
-            <span className="absolute inset-0 rounded-lg bg-gold-300/15" />
+            <motion.span
+              layoutId="tab-bg"
+              className="absolute inset-0 rounded-lg bg-gold-300/15"
+              transition={SPRING.snappy}
+            />
           )}
           <span className="relative">{tab.label}</span>
           {activeTab === tab.id && (
-            <span className="absolute bottom-0 left-1/2 h-[2px] w-4 -translate-x-1/2 rounded-full bg-gold-300" />
+            <motion.span
+              layoutId="tab-indicator"
+              className="absolute bottom-0 left-1/2 h-[2px] w-4 -translate-x-1/2 rounded-full bg-gold-300"
+              transition={SPRING.snappy}
+            />
           )}
         </button>
       ))}

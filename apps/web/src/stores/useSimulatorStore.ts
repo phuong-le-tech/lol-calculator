@@ -1,6 +1,16 @@
 "use client";
 
 import { create } from "zustand";
+import type { RuneSelection } from "@lol-sim/types";
+
+const EMPTY_RUNE_SELECTION: RuneSelection = {
+  primaryTreeId: null,
+  keystoneId: null,
+  primaryRuneIds: [null, null, null],
+  secondaryTreeId: null,
+  secondaryRuneIds: [null, null],
+  statShardIds: [null, null, null],
+};
 
 interface SimulatorStore {
   // Attacker
@@ -8,6 +18,7 @@ interface SimulatorStore {
   level: number;
   itemIds: number[];
   abilityRanks: Record<string, number>;
+  runeSelection: RuneSelection;
 
   // Target
   targetMode: "custom" | "champion" | "monster";
@@ -21,6 +32,7 @@ interface SimulatorStore {
   isChampionSelectOpen: boolean;
   isItemSelectOpen: boolean;
   activeItemSlot: number | null;
+  isRuneSelectOpen: boolean;
 
   // Actions
   setChampion: (id: string) => void;
@@ -33,6 +45,14 @@ interface SimulatorStore {
   addItem: (slotIndex: number, itemId: number) => void;
   removeItem: (slotIndex: number) => void;
   setItemSelectOpen: (open: boolean, slotIndex?: number) => void;
+  setRuneSelectOpen: (open: boolean) => void;
+  setPrimaryTree: (treeId: number) => void;
+  setKeystone: (id: number) => void;
+  setPrimaryRune: (tier: number, id: number) => void;
+  setSecondaryTree: (treeId: number) => void;
+  setSecondaryRune: (slot: number, id: number) => void;
+  setStatShard: (row: number, id: number) => void;
+  setRuneSelection: (selection: RuneSelection) => void;
   reset: () => void;
 }
 
@@ -41,6 +61,7 @@ const initialState = {
   level: 1,
   itemIds: [0, 0, 0, 0, 0, 0] as number[],
   abilityRanks: {} as Record<string, number>,
+  runeSelection: { ...EMPTY_RUNE_SELECTION },
   targetMode: "custom" as const,
   customTarget: { hp: 2000, armor: 100, mr: 100 },
   targetChampionId: null,
@@ -50,6 +71,7 @@ const initialState = {
   isChampionSelectOpen: false,
   isItemSelectOpen: false,
   activeItemSlot: null as number | null,
+  isRuneSelectOpen: false,
 };
 
 export const useSimulatorStore = create<SimulatorStore>((set) => ({
@@ -82,5 +104,50 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
       isItemSelectOpen: open,
       activeItemSlot: open ? (slotIndex ?? null) : null,
     }),
+  setRuneSelectOpen: (open) => set({ isRuneSelectOpen: open }),
+  setPrimaryTree: (treeId) =>
+    set((state) => ({
+      runeSelection: {
+        ...state.runeSelection,
+        primaryTreeId: treeId,
+        keystoneId: null,
+        primaryRuneIds: [null, null, null],
+        // Reset secondary if same as new primary
+        ...(state.runeSelection.secondaryTreeId === treeId
+          ? { secondaryTreeId: null, secondaryRuneIds: [null, null] as [null, null] }
+          : {}),
+      },
+    })),
+  setKeystone: (id) =>
+    set((state) => ({
+      runeSelection: { ...state.runeSelection, keystoneId: id },
+    })),
+  setPrimaryRune: (tier, id) =>
+    set((state) => {
+      const newIds = [...state.runeSelection.primaryRuneIds] as [number | null, number | null, number | null];
+      newIds[tier] = id;
+      return { runeSelection: { ...state.runeSelection, primaryRuneIds: newIds } };
+    }),
+  setSecondaryTree: (treeId) =>
+    set((state) => ({
+      runeSelection: {
+        ...state.runeSelection,
+        secondaryTreeId: treeId,
+        secondaryRuneIds: [null, null],
+      },
+    })),
+  setSecondaryRune: (slot, id) =>
+    set((state) => {
+      const newIds = [...state.runeSelection.secondaryRuneIds] as [number | null, number | null];
+      newIds[slot] = id;
+      return { runeSelection: { ...state.runeSelection, secondaryRuneIds: newIds } };
+    }),
+  setStatShard: (row, id) =>
+    set((state) => {
+      const newIds = [...state.runeSelection.statShardIds] as [number | null, number | null, number | null];
+      newIds[row] = id;
+      return { runeSelection: { ...state.runeSelection, statShardIds: newIds } };
+    }),
+  setRuneSelection: (selection) => set({ runeSelection: selection }),
   reset: () => set(initialState),
 }));

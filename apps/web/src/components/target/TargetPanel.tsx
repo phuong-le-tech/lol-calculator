@@ -1,11 +1,13 @@
 "use client";
 
+import { motion, AnimatePresence } from "framer-motion";
 import { useSimulatorStore } from "../../stores/useSimulatorStore";
 import { useSimulationResult } from "../../hooks/useSimulationResult";
 import { TargetViewTabs } from "./TargetViewTabs";
 import { DummyTarget } from "./DummyTarget";
 import { ChampionTarget } from "./ChampionTarget";
 import { MonsterTarget } from "./MonsterTarget";
+import { DURATION, EASE } from "../../lib/motion";
 
 const SECTION_LABEL = "text-[11px] font-semibold uppercase tracking-[1.5px] text-dark-100 font-ui";
 
@@ -19,9 +21,19 @@ export function TargetPanel() {
       <TargetViewTabs />
 
       {/* Target-specific content */}
-      {targetMode === "custom" && <DummyTarget />}
-      {targetMode === "champion" && <ChampionTarget />}
-      {targetMode === "monster" && <MonsterTarget />}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={targetMode}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: DURATION.normal, ease: EASE }}
+        >
+          {targetMode === "custom" && <DummyTarget />}
+          {targetMode === "champion" && <ChampionTarget />}
+          {targetMode === "monster" && <MonsterTarget />}
+        </motion.div>
+      </AnimatePresence>
 
       {/* Effective HP */}
       {effectiveHP && (

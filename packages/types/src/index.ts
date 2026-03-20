@@ -33,5 +33,14 @@ export {
   SimulationInputValidationError,
 } from "./simulation";
 
+export type {
+  RuneTree,
+  RuneSlot,
+  Rune,
+  StatShard,
+  RuneStats,
+  RuneSelection,
+} from "./rune";
+
 export type { SavedBuild } from "./build";
 export { sanitizeNotes } from "./build";

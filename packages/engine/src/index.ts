@@ -1,6 +1,7 @@
 // Stats
 export { calcGrowthStat, calcChampionStats, calcAttackSpeed, clampLevel } from "./stats/championStats";
 export { aggregateItemStats } from "./stats/itemStats";
+export { aggregateRuneStats } from "./stats/runeStats";
 export { mergeStats, applyMoveSpeedSoftCap } from "./stats/mergeStats";
 
 // Combat

@@ -1,16 +1,17 @@
-import { DataClient, fetchAllChampions, fetchAllItems } from "@lol-sim/ddragon";
+import { DataClient, fetchAllChampions, fetchAllItems, fetchAllRunes } from "@lol-sim/ddragon";
 import { SimulatorPage } from "../components/SimulatorPage";
 
 export default async function Home() {
   try {
     const client = new DataClient();
     const version = await client.getLatestVersion();
-    const [champions, items] = await Promise.all([
+    const [champions, items, runeTrees] = await Promise.all([
       fetchAllChampions(client, version),
       fetchAllItems(client, version),
+      fetchAllRunes(client, version),
     ]);
 
-    return <SimulatorPage champions={champions} items={items} patchVersion={version} />;
+    return <SimulatorPage champions={champions} items={items} runeTrees={runeTrees} patchVersion={version} />;
   } catch {
     return (
       <div className="flex h-screen items-center justify-center bg-dark-600">

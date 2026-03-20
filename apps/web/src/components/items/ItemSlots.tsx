@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSimulatorStore } from "../../stores/useSimulatorStore";
 import { useDataStore } from "../../stores/useDataStore";
 import { ItemIcon } from "./ItemIcon";
 import { X, Plus } from "lucide-react";
+import { DURATION } from "../../lib/motion";
 import type { Item } from "@lol-sim/types";
 
 const STAT_LABELS: Record<string, { label: string; color: string; format?: "percent" | "decimal" }> = {
@@ -39,7 +41,6 @@ function ItemTooltip({ item, slotIndex }: { item: Item; slotIndex: number }) {
     ([, v]) => v !== undefined && v !== 0
   ) as [string, number][];
 
-  // First 2 slots: align left, last 2: align right, middle: center
   const alignClass = slotIndex <= 1
     ? "left-0"
     : slotIndex >= 4
@@ -52,7 +53,13 @@ function ItemTooltip({ item, slotIndex }: { item: Item; slotIndex: number }) {
       : "left-1/2 -translate-x-1/2";
 
   return (
-    <div className={`absolute bottom-full z-50 mb-2 w-48 rounded-lg border border-gold-300/20 bg-dark-500 p-2.5 shadow-xl shadow-black/50 ${alignClass}`}>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 4 }}
+      transition={{ duration: DURATION.fast }}
+      className={`absolute bottom-full z-50 mb-2 w-48 rounded-lg border border-gold-300/20 bg-dark-500 p-2.5 shadow-xl shadow-black/50 ${alignClass}`}
+    >
       {/* Arrow */}
       <div className={`absolute -bottom-1 h-2 w-2 rotate-45 border-b border-r border-gold-300/20 bg-dark-500 ${arrowAlign}`} />
 
@@ -75,7 +82,7 @@ function ItemTooltip({ item, slotIndex }: { item: Item; slotIndex: number }) {
           })}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -95,49 +102,64 @@ export function ItemSlots() {
       <div className="flex gap-2">
         {itemIds.map((id, i) => {
           const item = equippedItems[i];
-          if (item) {
-            return (
-              <div
-                key={i}
-                className="relative"
-                onMouseEnter={() => setHoveredSlot(i)}
-                onMouseLeave={() => setHoveredSlot(null)}
-              >
-                {hoveredSlot === i && <ItemTooltip item={item} slotIndex={i} />}
-                <button
-                  onClick={() => setItemSelectOpen(true, i)}
-                  className="group relative overflow-hidden rounded border-2 border-gold-600 transition-all duration-200 hover:border-gold-300 hover:shadow-sm hover:shadow-gold-glow"
-                >
-                  <ItemIcon src={item.imageUrl} alt={item.name} size={32} />
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-all duration-200 group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeItem(i);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.stopPropagation();
-                        removeItem(i);
-                      }
-                    }}
-                  >
-                    <X size={14} className="text-dark-100" />
-                  </div>
-                </button>
-              </div>
-            );
-          }
           return (
-            <button
-              key={i}
-              onClick={() => setItemSelectOpen(true, i)}
-              className="flex h-8 w-8 items-center justify-center rounded border border-dashed border-dark-200 bg-dark-300 transition-all duration-200 hover:border-gold-600 hover:bg-dark-200 hover:shadow-sm hover:shadow-gold-glow"
-            >
-              <Plus size={12} className="text-dark-100" />
-            </button>
+            <div key={i} className="relative">
+              <AnimatePresence mode="wait">
+                {item ? (
+                  <motion.div
+                    key={`item-${id}`}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{ duration: DURATION.fast }}
+                    onMouseEnter={() => setHoveredSlot(i)}
+                    onMouseLeave={() => setHoveredSlot(null)}
+                  >
+                    <button
+                      onClick={() => setItemSelectOpen(true, i)}
+                      className="group relative overflow-hidden rounded border-2 border-gold-600 transition-all duration-200 hover:border-gold-300 hover:shadow-sm hover:shadow-gold-glow"
+                    >
+                      <ItemIcon src={item.imageUrl} alt={item.name} size={32} />
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-all duration-200 group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeItem(i);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.stopPropagation();
+                            removeItem(i);
+                          }
+                        }}
+                      >
+                        <X size={14} className="text-dark-100" />
+                      </div>
+                    </button>
+                  </motion.div>
+                ) : (
+                  <motion.button
+                    key={`empty-${i}`}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{ duration: DURATION.fast }}
+                    onClick={() => setItemSelectOpen(true, i)}
+                    className="flex h-8 w-8 items-center justify-center rounded border border-dashed border-dark-200 bg-dark-300 transition-all duration-200 hover:border-gold-600 hover:bg-dark-200 hover:shadow-sm hover:shadow-gold-glow"
+                  >
+                    <Plus size={12} className="text-dark-100" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {hoveredSlot === i && item && (
+                  <ItemTooltip item={item} slotIndex={i} />
+                )}
+              </AnimatePresence>
+            </div>
           );
         })}
       </div>
