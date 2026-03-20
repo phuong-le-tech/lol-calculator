@@ -6,12 +6,13 @@ import { useSimulatorStore } from "../stores/useSimulatorStore";
 import {
   mergeStats,
   aggregateItemStats,
+  aggregateRuneStats,
   calcAutoAttackDamage,
   calcTimeToKillAutoOnly,
   calcEffectiveResist,
   calcChampionStats,
 } from "@lol-sim/engine";
-import type { FinalStats, Item } from "@lol-sim/types";
+import type { FinalStats, Item, StatShard } from "@lol-sim/types";
 
 interface SimulationResultData {
   stats: FinalStats | null;
@@ -35,10 +36,12 @@ interface SimulationResultData {
 export function useSimulationResult(): SimulationResultData {
   const getChampion = useDataStore((s) => s.getChampion);
   const getItem = useDataStore((s) => s.getItem);
+  const statShardRows = useDataStore((s) => s.statShardRows);
   const selectedChampionId = useSimulatorStore((s) => s.selectedChampionId);
   const level = useSimulatorStore((s) => s.level);
   const customTarget = useSimulatorStore((s) => s.customTarget);
   const itemIds = useSimulatorStore((s) => s.itemIds);
+  const runeSelection = useSimulatorStore((s) => s.runeSelection);
 
   return useMemo(() => {
     if (!selectedChampionId) {
@@ -55,7 +58,22 @@ export function useSimulationResult(): SimulationResultData {
       .map((id) => getItem(id))
       .filter((item): item is Item => item !== undefined);
     const itemStats = aggregateItemStats(equippedItems.map((i) => i.stats));
-    const stats = mergeStats(champion.baseStats, level, itemStats);
+
+    // Resolve selected stat shards
+    const selectedShards: (StatShard | null)[] = runeSelection.statShardIds.map(
+      (shardId, rowIndex) => {
+        if (shardId === null || !statShardRows[rowIndex]) return null;
+        return statShardRows[rowIndex].find((s) => s.id === shardId) ?? null;
+      }
+    );
+
+    // Determine if champion is AP-based (magic adaptive type)
+    const isAP = champion.attackType === "RANGED"
+      ? (itemStats.ap || 0) > (itemStats.ad || 0)
+      : false;
+    const runeStats = aggregateRuneStats(selectedShards, isAP);
+
+    const stats = mergeStats(champion.baseStats, level, itemStats, runeStats);
     const baseStats = calcChampionStats(champion.baseStats, level);
 
     const target = {
@@ -89,5 +107,5 @@ export function useSimulationResult(): SimulationResultData {
         true: target.hp,
       },
     };
-  }, [selectedChampionId, level, customTarget, itemIds, getChampion, getItem]);
+  }, [selectedChampionId, level, customTarget, itemIds, runeSelection, statShardRows, getChampion, getItem]);
 }

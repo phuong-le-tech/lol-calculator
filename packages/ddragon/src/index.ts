@@ -16,4 +16,5 @@ export type {
 export { normalizeChampion, normalizeItem } from "./normalizer";
 export { fetchAllChampions, fetchChampion } from "./champions";
 export { fetchAllItems } from "./items";
+export { fetchAllRunes, STAT_SHARD_ROWS } from "./runes";
 export { checkForNewPatch } from "./patches";

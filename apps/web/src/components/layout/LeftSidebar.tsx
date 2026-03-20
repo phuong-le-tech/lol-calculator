@@ -3,6 +3,7 @@
 import { ChampionGrid } from "../champion/ChampionGrid";
 import { ChampionInfo } from "../champion/ChampionInfo";
 import { LevelSlider } from "../shared/LevelSlider";
+import { RuneSlots } from "../runes/RuneSlots";
 import { ItemSlots } from "../items/ItemSlots";
 import { useSimulatorStore } from "../../stores/useSimulatorStore";
 import { Search } from "lucide-react";
@@ -32,32 +33,8 @@ export function LeftSidebar() {
       {/* Level slider */}
       <LevelSlider level={level} onLevelChange={setLevel} />
 
-      {/* Runes placeholder */}
-      <div className="flex flex-col gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-[1.5px] text-dark-100">
-          Runes
-        </span>
-        <div className="flex gap-3">
-          {/* Primary rune group */}
-          <div className="flex flex-col items-center gap-1">
-            <div className="h-8 w-8 rounded-full bg-dark-300 border border-dark-200" />
-            <div className="flex gap-1">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-5 w-5 rounded-full bg-dark-300 border border-dark-200" />
-              ))}
-            </div>
-          </div>
-          {/* Secondary rune group */}
-          <div className="flex flex-col items-center gap-1">
-            <div className="h-6 w-6 rounded-full bg-dark-300 border border-dark-200" />
-            <div className="flex gap-1">
-              {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="h-5 w-5 rounded-full bg-dark-300 border border-dark-200" />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Runes */}
+      <RuneSlots />
 
       {/* Summoner Spells placeholder */}
       <div className="flex flex-col gap-2">
