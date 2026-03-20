@@ -19,6 +19,7 @@ interface SimulatorStore {
   itemIds: number[];
   abilityRanks: Record<string, number>;
   runeSelection: RuneSelection;
+  summonerSpellIds: [string | null, string | null];
 
   // Target
   targetMode: "custom" | "champion" | "monster";
@@ -33,6 +34,8 @@ interface SimulatorStore {
   isItemSelectOpen: boolean;
   activeItemSlot: number | null;
   isRuneSelectOpen: boolean;
+  isSummonerSpellSelectOpen: boolean;
+  activeSummonerSlot: number | null;
 
   // Actions
   setChampion: (id: string) => void;
@@ -53,6 +56,9 @@ interface SimulatorStore {
   setSecondaryRune: (slot: number, id: number) => void;
   setStatShard: (row: number, id: number) => void;
   setRuneSelection: (selection: RuneSelection) => void;
+  setSummonerSpellSelectOpen: (open: boolean, slot?: number) => void;
+  setSummonerSpell: (slot: number, spellId: string) => void;
+  removeSummonerSpell: (slot: number) => void;
   reset: () => void;
 }
 
@@ -62,6 +68,7 @@ const initialState = {
   itemIds: [0, 0, 0, 0, 0, 0] as number[],
   abilityRanks: {} as Record<string, number>,
   runeSelection: { ...EMPTY_RUNE_SELECTION },
+  summonerSpellIds: [null, null] as [string | null, string | null],
   targetMode: "custom" as const,
   customTarget: { hp: 2000, armor: 100, mr: 100 },
   targetChampionId: null,
@@ -72,6 +79,8 @@ const initialState = {
   isItemSelectOpen: false,
   activeItemSlot: null as number | null,
   isRuneSelectOpen: false,
+  isSummonerSpellSelectOpen: false,
+  activeSummonerSlot: null as number | null,
 };
 
 export const useSimulatorStore = create<SimulatorStore>((set) => ({
@@ -149,5 +158,22 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
       return { runeSelection: { ...state.runeSelection, statShardIds: newIds } };
     }),
   setRuneSelection: (selection) => set({ runeSelection: selection }),
+  setSummonerSpellSelectOpen: (open, slot) =>
+    set({
+      isSummonerSpellSelectOpen: open,
+      activeSummonerSlot: open ? (slot ?? null) : null,
+    }),
+  setSummonerSpell: (slot, spellId) =>
+    set((state) => {
+      const newIds = [...state.summonerSpellIds] as [string | null, string | null];
+      newIds[slot] = spellId;
+      return { summonerSpellIds: newIds };
+    }),
+  removeSummonerSpell: (slot) =>
+    set((state) => {
+      const newIds = [...state.summonerSpellIds] as [string | null, string | null];
+      newIds[slot] = null;
+      return { summonerSpellIds: newIds };
+    }),
   reset: () => set(initialState),
 }));

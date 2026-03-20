@@ -33,6 +33,8 @@ export {
   SimulationInputValidationError,
 } from "./simulation";
 
+export type { SummonerSpell } from "./summonerSpell";
+
 export type {
   RuneTree,
   RuneSlot,
