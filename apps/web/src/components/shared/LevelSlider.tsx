@@ -9,7 +9,7 @@ interface LevelSliderProps {
 export function LevelSlider({ level, onLevelChange, label = "LEVEL" }: LevelSliderProps) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-wider text-dark-50">
+      <span className="text-[11px] font-semibold uppercase tracking-[1.5px] text-dark-100">
         {label}
       </span>
       <div className="flex items-center gap-3">
@@ -21,7 +21,7 @@ export function LevelSlider({ level, onLevelChange, label = "LEVEL" }: LevelSlid
           onChange={(e) => onLevelChange(Number(e.target.value))}
           className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-dark-300 accent-gold-300"
         />
-        <span className="min-w-[2ch] text-right font-ui text-4xl font-bold text-gold-300">
+        <span className="min-w-[2ch] text-right font-mono text-[32px] font-medium text-gold-300">
           {level}
         </span>
       </div>
