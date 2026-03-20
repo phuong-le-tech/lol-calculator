@@ -29,10 +29,18 @@ export function ItemSlots() {
               >
                 <ItemIcon src={item.imageUrl} alt={item.name} size={32} />
                 <div
+                  role="button"
+                  tabIndex={0}
                   className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-all duration-200 group-hover:opacity-100"
                   onClick={(e) => {
                     e.stopPropagation();
                     removeItem(i);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.stopPropagation();
+                      removeItem(i);
+                    }
                   }}
                 >
                   <X size={14} className="text-dark-100" />
