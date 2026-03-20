@@ -45,8 +45,20 @@ export function ChampionSelectModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="flex max-h-[80vh] w-[560px] flex-col rounded-xl border border-dark-200 bg-dark-500">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Select Champion"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default"
+        onClick={() => setChampionSelectOpen(false)}
+        aria-label="Close modal"
+        tabIndex={-1}
+      />
+      <div className="relative flex max-h-[80vh] w-[560px] flex-col rounded-xl border border-dark-200 bg-dark-500">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-dark-200 px-6 py-4">
           <h2 className="text-sm font-bold uppercase tracking-wider text-gold-100">

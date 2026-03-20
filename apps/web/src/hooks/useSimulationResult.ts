@@ -11,7 +11,7 @@ import {
   calcEffectiveResist,
   calcChampionStats,
 } from "@lol-sim/engine";
-import type { FinalStats } from "@lol-sim/types";
+import type { FinalStats, Item } from "@lol-sim/types";
 
 interface SimulationResultData {
   stats: FinalStats | null;
@@ -34,9 +34,11 @@ interface SimulationResultData {
 
 export function useSimulationResult(): SimulationResultData {
   const getChampion = useDataStore((s) => s.getChampion);
+  const getItem = useDataStore((s) => s.getItem);
   const selectedChampionId = useSimulatorStore((s) => s.selectedChampionId);
   const level = useSimulatorStore((s) => s.level);
   const customTarget = useSimulatorStore((s) => s.customTarget);
+  const itemIds = useSimulatorStore((s) => s.itemIds);
 
   return useMemo(() => {
     if (!selectedChampionId) {
@@ -48,8 +50,12 @@ export function useSimulationResult(): SimulationResultData {
       return { stats: null, baseStats: null, autoAttack: null, timeToKill: null, effectiveHP: null };
     }
 
-    const emptyItemStats = aggregateItemStats([]);
-    const stats = mergeStats(champion.baseStats, level, emptyItemStats);
+    const equippedItems = itemIds
+      .filter((id) => id !== 0)
+      .map((id) => getItem(id))
+      .filter((item): item is Item => item !== undefined);
+    const itemStats = aggregateItemStats(equippedItems.map((i) => i.stats));
+    const stats = mergeStats(champion.baseStats, level, itemStats);
     const baseStats = calcChampionStats(champion.baseStats, level);
 
     const target = {
@@ -83,5 +89,5 @@ export function useSimulationResult(): SimulationResultData {
         true: target.hp,
       },
     };
-  }, [selectedChampionId, level, customTarget, getChampion]);
+  }, [selectedChampionId, level, customTarget, itemIds, getChampion, getItem]);
 }

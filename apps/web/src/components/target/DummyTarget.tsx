@@ -26,7 +26,7 @@ function StatInput({ label, value, onChange, min = 0, max = 99999, color, barMax
             const v = Number(e.target.value);
             if (!isNaN(v)) onChange(Math.max(min, Math.min(max, v)));
           }}
-          className="w-20 rounded bg-dark-400 px-2 py-1 text-right text-sm text-dark-100 outline-none focus:ring-1 focus:ring-gold-300"
+          className="w-20 rounded bg-dark-600 px-2 py-1 text-right font-mono text-sm text-dark-100 outline-none focus:ring-1 focus:ring-gold-300"
         />
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-dark-300">

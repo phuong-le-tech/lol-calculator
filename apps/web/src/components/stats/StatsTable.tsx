@@ -7,6 +7,7 @@ interface StatRow {
   value: number;
   baseValue?: number;
   format?: "number" | "percent" | "decimal";
+  color: string;
 }
 
 function formatStat(value: number, format: "number" | "percent" | "decimal" = "number"): string {
@@ -15,14 +16,17 @@ function formatStat(value: number, format: "number" | "percent" | "decimal" = "n
   return Math.round(value).toLocaleString();
 }
 
-function StatRowDisplay({ label, value, baseValue, format = "number" }: StatRow) {
+function StatRowDisplay({ label, value, baseValue, format = "number", color }: StatRow) {
   const bonus = baseValue !== undefined ? value - baseValue : 0;
   const hasBonus = bonus > 0;
 
   return (
-    <div className="flex items-center justify-between px-3 py-1.5">
+    <div
+      className={`flex items-center justify-between rounded-lg bg-[#111827AA] py-2 px-3 border-l-[3px] ${color}`}
+      style={{ height: "36px" }}
+    >
       <span className="text-sm text-dark-50">{label}</span>
-      <span className="text-sm font-medium text-dark-100">
+      <span className="font-mono text-sm text-dark-100">
         {formatStat(value, format)}
         {hasBonus && (
           <span className="ml-1 text-stat-health">(+{formatStat(bonus, format)})</span>
@@ -38,41 +42,37 @@ export function StatsTable() {
   if (!stats || !baseStats) return null;
 
   const leftColumn: StatRow[] = [
-    { label: "Attack Damage", value: stats.ad, baseValue: baseStats.ad },
-    { label: "Health", value: stats.hp, baseValue: baseStats.hp },
-    { label: "Armor", value: stats.armor, baseValue: baseStats.armor },
-    { label: "Attack Speed", value: stats.attackSpeed, format: "decimal" },
-    { label: "Crit Chance", value: stats.critChance, format: "percent" },
-    { label: "Lethality", value: stats.lethality },
-    { label: "Ability Haste", value: stats.abilityHaste },
-    { label: "Armor Pen%", value: stats.armorPen, format: "percent" },
+    { label: "Attack Damage", value: stats.ad, baseValue: baseStats.ad, color: "border-dmg-physical" },
+    { label: "Health", value: stats.hp, baseValue: baseStats.hp, color: "border-stat-health" },
+    { label: "Armor", value: stats.armor, baseValue: baseStats.armor, color: "border-stat-armor" },
+    { label: "Attack Speed", value: stats.attackSpeed, format: "decimal", color: "border-stat-as" },
+    { label: "Crit Chance", value: stats.critChance, format: "percent", color: "border-stat-crit" },
+    { label: "Lethality", value: stats.lethality, color: "border-dmg-physical" },
+    { label: "Ability Haste", value: stats.abilityHaste, color: "border-stat-ms" },
+    { label: "Armor Pen%", value: stats.armorPen, format: "percent", color: "border-dmg-physical" },
   ];
 
   const rightColumn: StatRow[] = [
-    { label: "Ability Power", value: stats.ap },
-    { label: "Mana", value: stats.mp, baseValue: baseStats.mp },
-    { label: "Magic Resist", value: stats.mr, baseValue: baseStats.mr },
-    { label: "Ability Haste", value: stats.abilityHaste },
-    { label: "On-hit Dmg", value: 0 },
-    { label: "Flat Magic Pen", value: stats.magicPen },
-    { label: "Magic Pen%", value: stats.magicPenPercent, format: "percent" },
-    { label: "Move Speed", value: stats.moveSpeed },
+    { label: "Ability Power", value: stats.ap, color: "border-dmg-magic" },
+    { label: "Mana", value: stats.mp, baseValue: baseStats.mp, color: "border-dmg-magic" },
+    { label: "Magic Resist", value: stats.mr, baseValue: baseStats.mr, color: "border-stat-mr" },
+    { label: "Crit Damage", value: stats.critDamage ?? 0, format: "percent", color: "border-stat-crit" },
+    { label: "On-hit Dmg", value: 0, color: "border-dmg-physical" },
+    { label: "Flat Magic Pen", value: stats.magicPen, color: "border-dmg-magic" },
+    { label: "Magic Pen%", value: stats.magicPenPercent, format: "percent", color: "border-dmg-magic" },
+    { label: "Move Speed", value: stats.moveSpeed, color: "border-stat-ms" },
   ];
 
   return (
     <div className="grid grid-cols-2 gap-x-4">
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-1">
         {leftColumn.map((row, i) => (
-          <div key={`left-${i}`} className={i % 2 === 0 ? "bg-dark-400/50 rounded" : ""}>
-            <StatRowDisplay {...row} />
-          </div>
+          <StatRowDisplay key={`left-${i}`} {...row} />
         ))}
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-1">
         {rightColumn.map((row, i) => (
-          <div key={`right-${i}`} className={i % 2 === 0 ? "bg-dark-400/50 rounded" : ""}>
-            <StatRowDisplay {...row} />
-          </div>
+          <StatRowDisplay key={`right-${i}`} {...row} />
         ))}
       </div>
     </div>

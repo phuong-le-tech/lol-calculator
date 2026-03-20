@@ -8,6 +8,7 @@ import { LeftSidebar } from "./layout/LeftSidebar";
 import { CenterPanel } from "./layout/CenterPanel";
 import { RightSidebar } from "./layout/RightSidebar";
 import { ChampionSelectModal } from "./champion/ChampionSelectModal";
+import { ItemSelectModal } from "./items/ItemSelectModal";
 
 interface SimulatorPageProps {
   champions: Champion[];
@@ -33,6 +34,7 @@ export function SimulatorPage({ champions, items, patchVersion }: SimulatorPageP
         </div>
       </div>
       <ChampionSelectModal />
+      <ItemSelectModal />
     </>
   );
 }

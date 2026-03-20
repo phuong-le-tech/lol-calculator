@@ -13,7 +13,7 @@ export function ChampionInfo() {
   if (!champion) {
     return (
       <div className="flex flex-col items-center gap-2 py-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-dark-300">
+        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-dark-300">
           <span className="text-2xl text-dark-50">?</span>
         </div>
         <span className="text-sm font-medium text-dark-50">No Champion</span>
@@ -24,7 +24,7 @@ export function ChampionInfo() {
 
   return (
     <div className="flex flex-col items-center gap-2 py-2">
-      <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-gold-600">
+      <div className="relative h-16 w-16 overflow-hidden rounded-lg border-2 border-gold-300">
         <Image
           src={champion.imageUrl}
           alt={champion.name}
@@ -34,7 +34,7 @@ export function ChampionInfo() {
         />
       </div>
       <div className="text-center">
-        <p className="font-semibold text-gold-100">{champion.name}</p>
+        <p className="font-logo text-xl text-gold-300">{champion.name}</p>
         <span className="inline-block rounded bg-dark-300 px-2 py-0.5 text-xs text-dark-100">
           {champion.role}
         </span>

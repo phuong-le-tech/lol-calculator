@@ -19,6 +19,8 @@ interface SimulatorStore {
   // UI
   activeTab: "stats" | "abilities" | "breakdown";
   isChampionSelectOpen: boolean;
+  isItemSelectOpen: boolean;
+  activeItemSlot: number | null;
 
   // Actions
   setChampion: (id: string) => void;
@@ -27,13 +29,16 @@ interface SimulatorStore {
   setTargetMode: (mode: "custom" | "champion" | "monster") => void;
   setCustomTarget: (stats: Partial<{ hp: number; armor: number; mr: number }>) => void;
   setChampionSelectOpen: (open: boolean) => void;
+  addItem: (slotIndex: number, itemId: number) => void;
+  removeItem: (slotIndex: number) => void;
+  setItemSelectOpen: (open: boolean, slotIndex?: number) => void;
   reset: () => void;
 }
 
 const initialState = {
   selectedChampionId: null,
   level: 1,
-  itemIds: [] as number[],
+  itemIds: [0, 0, 0, 0, 0, 0] as number[],
   abilityRanks: {} as Record<string, number>,
   targetMode: "custom" as const,
   customTarget: { hp: 2000, armor: 100, mr: 100 },
@@ -42,6 +47,8 @@ const initialState = {
   monsterType: null,
   activeTab: "stats" as const,
   isChampionSelectOpen: false,
+  isItemSelectOpen: false,
+  activeItemSlot: null as number | null,
 };
 
 export const useSimulatorStore = create<SimulatorStore>((set) => ({
@@ -56,5 +63,22 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
       customTarget: { ...state.customTarget, ...stats },
     })),
   setChampionSelectOpen: (open) => set({ isChampionSelectOpen: open }),
+  addItem: (slotIndex, itemId) =>
+    set((state) => {
+      const newIds = [...state.itemIds];
+      newIds[slotIndex] = itemId;
+      return { itemIds: newIds };
+    }),
+  removeItem: (slotIndex) =>
+    set((state) => {
+      const newIds = [...state.itemIds];
+      newIds[slotIndex] = 0;
+      return { itemIds: newIds };
+    }),
+  setItemSelectOpen: (open, slotIndex) =>
+    set({
+      isItemSelectOpen: open,
+      activeItemSlot: open ? (slotIndex ?? null) : null,
+    }),
   reset: () => set(initialState),
 }));
