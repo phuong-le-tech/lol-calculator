@@ -1,40 +1,45 @@
 "use client";
 
 import { useSimulatorStore } from "../../stores/useSimulatorStore";
+import { Target } from "lucide-react";
 
-interface StatInputProps {
+const SECTION_LABEL = "text-[11px] font-semibold uppercase tracking-[1.5px] text-dark-100 font-ui";
+
+const PRESETS = [
+  { label: "Squishy", hp: 2000, armor: 40, mr: 30 },
+  { label: "Bruiser", hp: 3000, armor: 100, mr: 60 },
+  { label: "Tank", hp: 4000, armor: 200, mr: 150 },
+  { label: "ADC lv18", hp: 2100, armor: 100, mr: 40 },
+];
+
+interface StatSliderProps {
   label: string;
   value: number;
   onChange: (value: number) => void;
   min?: number;
-  max?: number;
+  max: number;
   color: string;
-  barMax?: number;
+  textColor: string;
 }
 
-function StatInput({ label, value, onChange, min = 0, max = 99999, color, barMax = 300 }: StatInputProps) {
-  const barPercent = Math.min(100, (value / barMax) * 100);
-
+function StatSlider({ label, value, onChange, min = 0, max, color, textColor }: StatSliderProps) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-dark-50">{label}</span>
-        <input
-          type="number"
-          value={value}
-          onChange={(e) => {
-            const v = Number(e.target.value);
-            if (!isNaN(v)) onChange(Math.max(min, Math.min(max, v)));
-          }}
-          className="w-20 rounded bg-dark-600 px-2 py-1 text-right font-mono text-sm text-dark-100 outline-none focus:ring-1 focus:ring-gold-300"
-        />
+        <span className={SECTION_LABEL}>{label}</span>
+        <span className={`font-mono text-lg font-medium ${textColor}`}>
+          {value.toLocaleString()}
+        </span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-dark-300">
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${barPercent}%`, backgroundColor: color }}
-        />
-      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-current"
+        style={{ color }}
+      />
     </div>
   );
 }
@@ -45,38 +50,58 @@ export function DummyTarget() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-dark-300">
-          <span className="text-lg text-dark-50">D</span>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-gold-100">Dummy</p>
-          <p className="text-xs text-dark-50">Custom target</p>
+      {/* Presets */}
+      <span className={SECTION_LABEL}>Target Presets</span>
+      <div className="flex flex-wrap gap-1.5">
+        {PRESETS.map((preset) => (
+          <button
+            key={preset.label}
+            onClick={() => setCustomTarget({ hp: preset.hp, armor: preset.armor, mr: preset.mr })}
+            className={`rounded-lg px-2.5 py-1 text-[11px] font-medium font-ui transition-colors ${
+              customTarget.hp === preset.hp && customTarget.armor === preset.armor && customTarget.mr === preset.mr
+                ? "bg-gold-glow text-gold-100"
+                : "border border-gold-300/15 bg-[#111827AA] text-gold-500 hover:text-gold-300"
+            }`}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Target info card */}
+      <div className="flex items-center gap-3 rounded-xl border border-gold-300/10 bg-[#111827AA] p-2 px-3">
+        <Target size={32} className="shrink-0 text-gold-600" />
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-gold-100">Dummy Target</span>
+          <span className="font-mono text-xs text-dark-100">Custom Stats</span>
         </div>
       </div>
 
-      <StatInput
-        label="HP"
+      {/* Stat sliders */}
+      <StatSlider
+        label="Health"
         value={customTarget.hp}
         onChange={(hp) => setCustomTarget({ hp })}
         min={1}
-        max={99999}
+        max={10000}
         color="var(--color-stat-health)"
-        barMax={5000}
+        textColor="text-stat-health"
       />
-      <StatInput
+      <StatSlider
         label="Armor"
         value={customTarget.armor}
         onChange={(armor) => setCustomTarget({ armor })}
-        max={1000}
+        max={500}
         color="var(--color-stat-armor)"
+        textColor="text-stat-armor"
       />
-      <StatInput
+      <StatSlider
         label="Magic Resist"
         value={customTarget.mr}
         onChange={(mr) => setCustomTarget({ mr })}
-        max={1000}
+        max={500}
         color="var(--color-stat-mr)"
+        textColor="text-stat-mr"
       />
     </div>
   );

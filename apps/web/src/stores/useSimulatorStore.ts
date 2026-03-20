@@ -28,6 +28,7 @@ interface SimulatorStore {
   setActiveTab: (tab: "stats" | "abilities" | "breakdown") => void;
   setTargetMode: (mode: "custom" | "champion" | "monster") => void;
   setCustomTarget: (stats: Partial<{ hp: number; armor: number; mr: number }>) => void;
+  setMonsterType: (type: string) => void;
   setChampionSelectOpen: (open: boolean) => void;
   addItem: (slotIndex: number, itemId: number) => void;
   removeItem: (slotIndex: number) => void;
@@ -62,6 +63,7 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
     set((state) => ({
       customTarget: { ...state.customTarget, ...stats },
     })),
+  setMonsterType: (type) => set({ monsterType: type }),
   setChampionSelectOpen: (open) => set({ isChampionSelectOpen: open }),
   addItem: (slotIndex, itemId) =>
     set((state) => {

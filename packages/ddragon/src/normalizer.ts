@@ -326,39 +326,51 @@ export function normalizeItem(
 ): Item {
   const stats: ItemStats = {};
 
-  for (const [rawKey, statBlock] of Object.entries(raw.stats)) {
-    const mappedKey = MERAKI_STAT_MAPPING[rawKey];
-    if (!mappedKey || !statBlock) continue;
+  // Collect all stat sources: base stats + passive stats
+  const allStatSources: Record<string, MerakiItemStatBlock>[] = [raw.stats];
 
-    // Use flat value for most stats
-    let value = statBlock.flat;
-
-    // Some stats use percent field instead of flat (like armorPen is % pen)
-    if (PERCENT_STAT_FIELDS.has(rawKey) && statBlock.percent !== 0) {
-      value = statBlock.percent;
+  // Include stats from passives (many items list stats like AP, AD under passives)
+  for (const passive of raw.passives) {
+    if (passive.stats) {
+      allStatSources.push(passive.stats);
     }
+  }
 
-    // For magic pen, check both flat and percent
-    if (rawKey === "magicPenetration") {
-      if (statBlock.flat !== 0) {
-        stats.magicPen = statBlock.flat;
-      }
-      if (statBlock.percent !== 0) {
-        stats.magicPenPercent = statBlock.percent;
-      }
-      continue;
-    }
+  for (const statSource of allStatSources) {
+    for (const [rawKey, statBlock] of Object.entries(statSource)) {
+      const mappedKey = MERAKI_STAT_MAPPING[rawKey];
+      if (!mappedKey || !statBlock) continue;
 
-    // For armor pen, it's always % pen in the game now
-    if (rawKey === "armorPenetration") {
-      if (statBlock.percent !== 0) {
-        stats.armorPen = statBlock.percent;
-      }
-      continue;
-    }
+      // Use flat value for most stats
+      let value = statBlock.flat;
 
-    if (value !== 0) {
-      stats[mappedKey] = value;
+      // Some stats use percent field instead of flat (like armorPen is % pen)
+      if (PERCENT_STAT_FIELDS.has(rawKey) && statBlock.percent !== 0) {
+        value = statBlock.percent;
+      }
+
+      // For magic pen, check both flat and percent
+      if (rawKey === "magicPenetration") {
+        if (statBlock.flat !== 0) {
+          stats.magicPen = (stats.magicPen || 0) + statBlock.flat;
+        }
+        if (statBlock.percent !== 0) {
+          stats.magicPenPercent = (stats.magicPenPercent || 0) + statBlock.percent;
+        }
+        continue;
+      }
+
+      // For armor pen, it's always % pen in the game now
+      if (rawKey === "armorPenetration") {
+        if (statBlock.percent !== 0) {
+          stats.armorPen = (stats.armorPen || 0) + statBlock.percent;
+        }
+        continue;
+      }
+
+      if (value !== 0) {
+        stats[mappedKey] = ((stats[mappedKey] as number) || 0) + value;
+      }
     }
   }
 

@@ -10,8 +10,8 @@ import { BreakdownTab } from "../stats/BreakdownTab";
 
 const TABS = [
   { id: "stats", label: "Stats" },
-  { id: "abilities", label: "Abilities", disabled: true },
-  { id: "breakdown", label: "Breakdown", disabled: true },
+  { id: "abilities", label: "Abilities" },
+  { id: "breakdown", label: "Breakdown" },
 ];
 
 export function CenterPanel() {
@@ -35,9 +35,11 @@ export function CenterPanel() {
         activeTab={activeTab}
         onTabChange={(id) => setActiveTab(id as "stats" | "abilities" | "breakdown")}
       />
-      {activeTab === "stats" && <StatsTable />}
-      {activeTab === "abilities" && <AbilitiesTab />}
-      {activeTab === "breakdown" && <BreakdownTab />}
+      <div className="flex min-h-0 flex-1 flex-col">
+        {activeTab === "stats" && <StatsTable />}
+        {activeTab === "abilities" && <AbilitiesTab />}
+        {activeTab === "breakdown" && <BreakdownTab />}
+      </div>
     </main>
   );
 }

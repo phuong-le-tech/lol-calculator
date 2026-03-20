@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useSimulatorStore } from "../../stores/useSimulatorStore";
 
-const VIEW_TABS = [
+const VIEW_TABS: { id: "champion" | "custom" | "monster"; label: string }[] = [
   { id: "champion", label: "Champion" },
-  { id: "synergy", label: "Synergy" },
-  { id: "counter", label: "Counter" },
+  { id: "custom", label: "Dummy" },
+  { id: "monster", label: "Monster" },
 ];
 
 export function TargetViewTabs() {
-  const [activeView, setActiveView] = useState("champion");
+  const activeView = useSimulatorStore((s) => s.targetMode);
+  const setActiveView = useSimulatorStore((s) => s.setTargetMode);
 
   return (
     <div className="flex">
