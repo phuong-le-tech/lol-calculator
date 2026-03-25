@@ -4,6 +4,7 @@ import { ChampionGrid } from "../champion/ChampionGrid";
 import { ChampionInfo } from "../champion/ChampionInfo";
 import { LevelSlider } from "../shared/LevelSlider";
 import { RuneSlots } from "../runes/RuneSlots";
+import { SummonerSpellSlots } from "../summonerSpells/SummonerSpellSlots";
 import { ItemSlots } from "../items/ItemSlots";
 import { useSimulatorStore } from "../../stores/useSimulatorStore";
 import { Search } from "lucide-react";
@@ -36,17 +37,8 @@ export function LeftSidebar() {
       {/* Runes */}
       <RuneSlots />
 
-      {/* Summoner Spells placeholder */}
-      <div className="flex flex-col gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-[1.5px] text-dark-100">
-          Summoner Spells
-        </span>
-        <div className="flex gap-1">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="h-9 w-9 rounded border border-dark-200 bg-dark-400" />
-          ))}
-        </div>
-      </div>
+      {/* Summoner Spells */}
+      <SummonerSpellSlots />
 
       <ItemSlots />
     </aside>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import type { Champion, Item, RuneTree } from "@lol-sim/types";
+import type { Champion, Item, RuneTree, SummonerSpell } from "@lol-sim/types";
 import { STAT_SHARD_ROWS } from "@lol-sim/ddragon";
 import { useDataStore } from "../stores/useDataStore";
 import { TopBar } from "./layout/TopBar";
@@ -11,22 +11,26 @@ import { RightSidebar } from "./layout/RightSidebar";
 import { ChampionSelectModal } from "./champion/ChampionSelectModal";
 import { ItemSelectModal } from "./items/ItemSelectModal";
 import { RuneSelectModal } from "./runes/RuneSelectModal";
+import { SummonerSpellSelectModal } from "./summonerSpells/SummonerSpellSelectModal";
 
 interface SimulatorPageProps {
   champions: Champion[];
   items: Item[];
   runeTrees: RuneTree[];
+  summonerSpells: SummonerSpell[];
   patchVersion: string;
 }
 
-export function SimulatorPage({ champions, items, runeTrees, patchVersion }: SimulatorPageProps) {
+export function SimulatorPage({ champions, items, runeTrees, summonerSpells, patchVersion }: SimulatorPageProps) {
   const setData = useDataStore((s) => s.setData);
   const setRuneData = useDataStore((s) => s.setRuneData);
+  const setSummonerSpells = useDataStore((s) => s.setSummonerSpells);
 
   useEffect(() => {
     setData(champions, items, patchVersion);
     setRuneData(runeTrees, STAT_SHARD_ROWS);
-  }, [champions, items, runeTrees, patchVersion, setData, setRuneData]);
+    setSummonerSpells(summonerSpells);
+  }, [champions, items, runeTrees, summonerSpells, patchVersion, setData, setRuneData, setSummonerSpells]);
 
   return (
     <>
@@ -41,6 +45,7 @@ export function SimulatorPage({ champions, items, runeTrees, patchVersion }: Sim
       <ChampionSelectModal />
       <ItemSelectModal />
       <RuneSelectModal />
+      <SummonerSpellSelectModal />
     </>
   );
 }

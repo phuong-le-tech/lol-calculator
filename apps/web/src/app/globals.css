@@ -31,6 +31,8 @@
   --color-stat-as: #FFF176;
   --color-stat-crit: #F44336;
   --color-stat-ms: #81D4FA;
+  --color-stat-haste: #B39DDB;
+  --color-stat-cc: #F48FB1;
 
   /* Status */
   --color-error: #EF4444;
